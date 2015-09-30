@@ -1,6 +1,7 @@
 # prop-type
 
 Small wrapper to wrap your custom type check so that you can use `myCustomType.isRequired` in a similar fasion to React's built-in types.
+React expects type-checks to return an `Error` object upon faillure and nothing otherwise.
 
 ### Install
 
@@ -8,13 +9,14 @@ Small wrapper to wrap your custom type check so that you can use `myCustomType.i
 
 ### Usage:
      
-     var type = propType(function isFoo(props, name){  
-         if(props[name] !== "foo")
-             return new TypeError("not a foo");
-     });
-
-     // optional by default:
-     assert.ok( ! type(null) );
-
-     // required like so:
-     assert.ok( type.isRequired(null) );
+    var check = function(props, propName){
+        if(props[propName]) return;
+        return Error("Test error");
+    };
+    
+    var type = propType(check);
+    
+    
+    assert.ok(!type({}, "foo"), "undefined is ok, as the type is optional by default");
+    assert.ok( type.isRequired({}, "foo") instanceof Error, "But null is not ok for required");
+    assert.equal( type.isRequired({ foo: true }, "foo"), undefined, "Return undefined when the typecheck is ok");
